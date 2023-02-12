@@ -1,5 +1,6 @@
 package model;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class User {
@@ -103,11 +104,12 @@ public class User {
 
     @Override
     public String toString() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MMM/dd");
         return "{" +
             " id='" + getId() + "'" +
             ", username='" + getUsername() + "'" +
                 ", full name='" + getFullName() + "'" +
-                ", date of birthday ='" + getDob() + "'" +
+                ", date of birthday ='" + sdf.format(getDob().getTime()) +
             ", address = '" + getAddress() + "'" +
             ", number phone = '" + getNumberPhone() + "'" +
             "}";

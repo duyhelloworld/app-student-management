@@ -1,6 +1,5 @@
 package controller;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -8,13 +7,13 @@ import model.User;
 
 public interface CrudUser {
     
-    public void create(String username, String fullName, Calendar dob, String address, String numberPhone);
+    public void create(String username, String fullName, boolean sex, String dob, String address, String numberPhone);
     
     public User getUser(long id);
     
     public List<User> getUsers();
 
-    public List<User> getUsers(long[] id);
+    public List<User> getUsers(long start, long end);
 
     public boolean update(User user);
 

@@ -1,2 +1,13 @@
-#0: Date : 11-02-2023 20:40:55,
-User agent : Linux 5.15.0-60-generic amd64
+#1: 12-02-2023 23:01:36 : Success logged in Database. 
+Username : duyaiti
+Password : ********
+#2: DATE: 12-02-2023 23:01:36,
+	User agent : Linux 5.15.0-60-generic amd64
+Error : Some users has mistake id in 2 to 2 in DB. 
+	Or appear query id which start equals to end. 
+
+Code : 109228794
+
+#3: 12-02-2023 23:01:36 Viewed users where id  in range 0-2
+#4: 12-02-2023 23:01:36 Viewed users where id  in range 2-10
+#5: 12-02-2023 23:01:36 Viewed users where id  = -1

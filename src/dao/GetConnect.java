@@ -10,7 +10,7 @@ public abstract class GetConnect {
         Connection conn = null;
         String usr = "duyaiti";
         String pss = "12345678";
-        String url = "jdbc:mysql://localhost:3306/" + "AppConsole";
+        String url = "jdbc:mysql://localhost:3306/" + "App_Console";
         Logging logger = new Logging();
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
