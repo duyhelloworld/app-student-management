@@ -5,27 +5,20 @@ import java.util.List;
 
 import model.User;
 
+/**
+ * @see users : implement Singleton Design Pattern
+ */
+
+
 public class ListUser {
-    private List<User> users = new ArrayList<User>();
+    private static List<User> users = new ArrayList<User>();
+    private ListUser() {}
 
-    public ListUser() {
-    }
-
-    public ListUser(List<User> users) {
-        this.users = users;
-    }
-
-    public List<User> getUsers() {
-        return this.users;
-    }
-
-    public void setUsers(List<User> users) {
-        this.users = users;
-    }
-
-    public ListUser users(List<User> users) {
-        setUsers(users);
-        return this;
+    public static synchronized List<User> getInstance() {
+        if (users == null) {
+            users = new ArrayList<User>();
+        }
+        return users;
     }
 
     @Override
