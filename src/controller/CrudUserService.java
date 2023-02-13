@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 import dao.GetConnect;
@@ -14,6 +13,7 @@ import exceptions.MultiUserSameIdException;
 import exceptions.SomeMistakeInAListIdException;
 import logging.Logging;
 import model.User;
+import repos.ListUser;
 
 public class CrudUserService implements CrudUser {
     String tableName = "`User`", dbNAme = "`App_Console`", tableUser = dbNAme + "." + tableName;
@@ -23,7 +23,7 @@ public class CrudUserService implements CrudUser {
     String createQuery = "INSERT INTO " + tableUser + " VALUES( DEFAULT, ?, ?, ?, ?, ?, ?);";
     String deleteQuery = "DELETE FROM " + tableUser + " WHERE id = ?;";
 
-    List<User> list = new LinkedList<User>();
+    List<User> list = ListUser.getInstance();
     Calendar _dob = Calendar.getInstance();
 
     public String updateQuery(String column) {
@@ -116,29 +116,40 @@ public class CrudUserService implements CrudUser {
 
     @Override
     public boolean find(long id) {
-        try {
-            PreparedStatement stm = conn.prepareStatement(viewOnlyQuery);
-            stm.setLong(1, id);
-
-            ResultSet rs = stm.executeQuery();
-            if (rs.first()) {
-                Logging.writeLog(logger.view(id, id));
-                return true;
-            }
-        } catch (SQLException e) {
-            Logging.writeLog(logger.getError(e));
+        if (getUser(id) != null) {
+            Logging.writeLog(logger.view(id, id));
+            return true;
         }
         return false;
     }
 
     @Override
     public boolean update(User user) {
-        return false;
+        if (!find(user.getId())) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     @Override
     public boolean update(long id, String username) {
-        return false;
+        if (!find(id)) {
+            return false;
+        } else {
+            try {
+                PreparedStatement stm = conn.prepareStatement(updateQuery("username"));
+                stm.setString(1, username);
+                stm.setLong(2, id);
+                if (stm.executeUpdate() == 1) {
+                    Logging.writeLog(logger.update("user_name", id));
+                    return true;
+                }
+            } catch (SQLException e) {
+                Logging.writeLog(logger.getError(e));
+            }
+            return false;
+        }
     }
 
     @Override

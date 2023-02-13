@@ -1,13 +1,39 @@
-#1: 12-02-2023 23:01:36 : Success logged in Database. 
+#1: 13-02-2023 13:11:31 : Success logged in Database. 
 Username : duyaiti
-Password : ********
-#2: DATE: 12-02-2023 23:01:36,
+Password : ********.
+#2: 13-02-2023 13:11:32
+	INSERT action excuted success
+	Affected 1 row.
+#3: DATE: 13-02-2023 13:11:32,
 	User agent : Linux 5.15.0-60-generic amd64
-Error : Some users has mistake id in 2 to 2 in DB. 
-	Or appear query id which start equals to end. 
+	Error : Some users has mistake ids from 2 to 2 in DB.
 
-Code : 109228794
+	Code : 823723302
+.
+#4: 13-02-2023 13:11:32 Viewed users where id  in range 0-2.
+#5: 13-02-2023 13:11:32 Viewed users where id  in range 2-10.
+#6: 2003-12-23.
+#7: 13-02-2023 13:11:32 Viewed users where id  = 1.
+#1: 13-02-2023 13:17:56 : Success logged in Database. 
+Username : duyaiti
+Password : ********.
+#2: 13-02-2023 13:17:57
+	INSERT action excuted success
+	Affected 1 row.
+#3: DATE: 13-02-2023 13:17:57,
+	User agent : Linux 5.15.0-60-generic amd64
+	Error : Some users has mistake ids from 2 to 2 in DB.
 
-#3: 12-02-2023 23:01:36 Viewed users where id  in range 0-2
-#4: 12-02-2023 23:01:36 Viewed users where id  in range 2-10
-#5: 12-02-2023 23:01:36 Viewed users where id  = -1
+	Code : 823723302
+.
+#4: 13-02-2023 13:17:57 Viewed users where id  in range 0-2.
+#5: 13-02-2023 13:17:57 Viewed users where id  in range 2-10.
+#6: 2003-12-23.
+#7: 13-02-2023 13:17:57 Viewed users where id  = 1.
+#8: 2003-12-23.
+#9: 13-02-2023 13:17:57 Viewed users where id  = 1.
+#10: DATE: 13-02-2023 13:17:57,
+	User agent : Linux 5.15.0-60-generic amd64
+	Error : Unknown column 'username' in 'field list'
+	Code : 16503286
+.
