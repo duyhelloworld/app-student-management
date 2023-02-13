@@ -27,12 +27,12 @@ public class Logging {
 
 
     public String getError(Exception e) {
-        return getInfos() + "\nError : " + e.getLocalizedMessage() + "\nCode : " + e.hashCode() + "\n\n";
+        return getInfos() + "\n\tError : " + e.getLocalizedMessage() + "\n\tCode : " + e.hashCode() + "\n";
     }
 
 
     public String successLog(String usr, String pss) {
-        return getTime() + " : Success logged in Database. \nUsername : " + usr + "\nPassword : " + hidePass(pss) + "\n";
+        return getTime() + " : Success logged in Database. \nUsername : " + usr + "\nPassword : " + hidePass(pss);
     }
     
 
@@ -51,11 +51,16 @@ public class Logging {
 
     public String sqlSuccess(String query, boolean success, int rowAffected) {
         return getTime() + "\n\t" + query.substring(0, 6) + " action excuted " + (success ? "success" : "failure")
-                + "\n\tAffected " + rowAffected + " row" + (rowAffected > 1 ? "s" : "") + ".\n";
+                + "\n\tAffected " + rowAffected + " row" + (rowAffected > 1 ? "s" : "");
     }
     
     public String view(long start, long end) {
-        return getTime() + " Viewed users where id " + ((end - start > 1) ? " in range " + start + "-" + end : " = " + end) + "\n";
+        return getTime() + " Viewed users where id "
+                + ((end - start > 1) ? " in range " + start + "-" + end : " = " + end);
+    }
+    
+    public String update(String field, long id) {
+        return getTime() + " Updated " + field + " of user's id = " + id;
     }
 
     public static void writeLog(String logLine) {
@@ -63,10 +68,10 @@ public class Logging {
             FileWriter fileWriter = new FileWriter(fileLog, true);
             if (!fileLog.exists()) {
                 fileLog.getParentFile().mkdirs();
-                fileWriter.write("#" + code + ": " + logLine);
+                fileWriter.write("#" + code + ": " + logLine + ".\n");
             } else {
                 Logging.setCode(++code);
-                fileWriter.append("#" + code + ": " + logLine);
+                fileWriter.append("#" + code + ": " + logLine + ".\n");
             }
             fileWriter.flush();
             fileWriter.close();
