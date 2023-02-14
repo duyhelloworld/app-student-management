@@ -23,6 +23,23 @@ public class User {
         this.numberPhone = numberPhone;
     }
 
+    // - Use for treeMap
+    public User(Long id, String fullName, Calendar dob, String address, String numberPhone) {
+        this.id = id;
+        this.fullName = fullName;
+        this.dob = dob;
+        this.address = address;
+        this.numberPhone = numberPhone;
+    }
+
+    public User(String username, String fullName, Calendar dob, String address, String numberPhone) {
+        this.username = username;
+        this.fullName = fullName;
+        this.dob = dob;
+        this.address = address;
+        this.numberPhone = numberPhone;
+    }
+
     public Long getId() {
         return this.id;
     }
