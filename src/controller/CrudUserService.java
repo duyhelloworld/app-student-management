@@ -1,40 +1,48 @@
 package controller;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
+import java.util.TreeMap;
 
 import dao.GetConnect;
 import exceptions.MultiUserSameIdException;
 import exceptions.SomeMistakeInAListIdException;
 import logging.Logging;
 import model.User;
-import repos.ListUser;
+import repos.Users;
 
 public class CrudUserService implements CrudUser {
     String tableName = "`User`", dbNAme = "`App_Console`", tableUser = dbNAme + "." + tableName;
+
     String viewAllQuery = "SELECT * FROM " + tableUser + ";";
     String viewRangeQuery = "SELECT * FROM " + tableUser + " WHERE id IN (?, ?);";
     String viewOnlyQuery = "SELECT * FROM " + tableUser + " WHERE id = ?;";
+
     String createQuery = "INSERT INTO " + tableUser + " VALUES( DEFAULT, ?, ?, ?, ?, ?, ?);";
-    String deleteQuery = "DELETE FROM " + tableUser + " WHERE id = ?;";
+    String deleteOnlyQuery = "DELETE FROM " + tableUser + " WHERE id = ?;";
 
-    List<User> list = ListUser.getInstance();
+    
+    TreeMap<String, User> treeUser = Users.getInstance();
     Calendar _dob = Calendar.getInstance();
-
+    
     public String updateQuery(String column) {
         return "UPDATE " + tableUser + " SET " + column + " = ? WHERE id = ?;";
     }
-
+    
     static Logging logger = new Logging();
     static Connection conn = GetConnect.getConnection();
-
+    
+    public String deleteRangeQuery(List<Long> listIds) {
+        return "DELETE FROM " + tableUser + " WHERE id IN (" + logger.getRangeId(listIds) +");";
+    }
+    
     @Override
-    public void create(String username, String fullName, boolean sex, String dob, String address, String numberPhone) {
+    public void save(String username, String fullName, boolean sex, String dob, String address, String numberPhone) {
         try {
             PreparedStatement stm = conn.prepareStatement(createQuery);
             if (stm == null) {
@@ -53,14 +61,13 @@ public class CrudUserService implements CrudUser {
             } else {
                 Logging.writeLog(logger.sqlSuccess(createQuery, false, 0));
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             Logging.writeLog(logger.getError(e));
         }
     }
 
     @Override
-    public User getUser(long id) {
+    public User getUser(Long id) {
         try {
             PreparedStatement stm = conn.prepareStatement(viewOnlyQuery);
             stm.setLong(1, id);
@@ -69,14 +76,15 @@ public class CrudUserService implements CrudUser {
             if (rs.getRow() > 1) {
                 throw new MultiUserSameIdException("Some users has same id in DB.\n");
             } else {
-                rs.next();
-                
-                Date dob = rs.getDate("dob");
-                Logging.writeLog(dob.toString());
-                _dob.setTime(dob);
+                if (rs.next()) {
+                    Date dob = rs.getDate("dob");
+                    Logging.writeLog(dob.toString());
+                    _dob.setTime(dob);
 
-                return new User(rs.getLong("id"), rs.getString("user_name"), rs.getString("full_name"), _dob,
-                        rs.getString("address"), rs.getString("number_phone"));
+                    return new User(rs.getLong("id"), rs.getString("user_name"), rs.getString("full_name"), _dob,
+                            rs.getString("address"), rs.getString("number_phone"));
+                }
+                return null;
             }
         } catch (SQLException e) {
             Logging.writeLog(logger.getError(e));
@@ -87,24 +95,30 @@ public class CrudUserService implements CrudUser {
     }
 
     @Override
-    public List<User> getUsers(long start, long end) {
+    public TreeMap<String, User> getUsers(long start, long end) {
         try {
             PreparedStatement stm = conn.prepareStatement(viewRangeQuery);
             stm.setLong(1, start);
             stm.setLong(2, end);
             ResultSet rs = stm.executeQuery();
             if (rs.getRow() == (end - start)) {
-                throw new SomeMistakeInAListIdException("Some users has mistake ids from " + start + " to " + end + " in DB.\n");
+                throw new SomeMistakeInAListIdException(
+                        "Some users has mistake ids from " + start + " to " + end + " in DB.\n");
             } else {
-                
+
                 while (rs.next()) {
                     Date dob = rs.getDate("dob");
                     _dob.setTime(dob);
-                    list.add(new User(rs.getLong("id"), rs.getString("user_name"), rs.getString("full_name"), _dob,
-                            rs.getString("address"), rs.getString("number_phone")));
+                    treeUser.put(
+                            rs.getString("user_name"),
+                            new User(rs.getLong("id"),
+                                    rs.getString("full_name"),
+                                    _dob,
+                                    rs.getString("address"),
+                                    rs.getString("number_phone")));
                 }
                 Logging.writeLog(logger.view(start, end));
-                return list;
+                return treeUser;
             }
         } catch (SQLException e) {
             Logging.writeLog(logger.getError(e));
@@ -123,26 +137,16 @@ public class CrudUserService implements CrudUser {
         return false;
     }
 
-    @Override
-    public boolean update(User user) {
-        if (!find(user.getId())) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    @Override
-    public boolean update(long id, String username) {
+    boolean updateOneColumn(long id, String columnName, String value) {
         if (!find(id)) {
             return false;
         } else {
             try {
-                PreparedStatement stm = conn.prepareStatement(updateQuery("username"));
-                stm.setString(1, username);
+                PreparedStatement stm = conn.prepareStatement(updateQuery(columnName));
+                stm.setString(1, value);
                 stm.setLong(2, id);
                 if (stm.executeUpdate() == 1) {
-                    Logging.writeLog(logger.update("user_name", id));
+                    Logging.writeLog(logger.update(columnName, id));
                     return true;
                 }
             } catch (SQLException e) {
@@ -153,49 +157,111 @@ public class CrudUserService implements CrudUser {
     }
 
     @Override
+    public boolean update(long id, String username) {
+        return updateOneColumn(id, "user_name", username);
+    }
+
+    @Override
     public boolean update(long id, String username, String fullName) {
-        return false;
+        return updateOneColumn(id, "full_name", fullName);
     }
 
     @Override
     public boolean update(long id, String username, String fullName, String address) {
-        return false;
+        return updateOneColumn(id, "address", address);
     }
 
     @Override
     public boolean update(long id, String username, String fullName, String address, String nummberPhone) {
-        return false;
+        return updateOneColumn(id, "number_phone", nummberPhone);
     }
 
     @Override
     public boolean update(long id, boolean sex) {
-        return false;
+        if (!find(id)) {
+            return false;
+        } else {
+            try {
+                PreparedStatement stm = conn.prepareStatement(updateQuery("sex"));
+                stm.setBoolean(1, sex);
+                stm.setLong(2, id);
+                if (stm.executeUpdate() == 1) {
+                    Logging.writeLog(logger.update("sex", id));
+                    return true;
+                }
+            } catch (SQLException e) {
+                Logging.writeLog(logger.getError(e));
+            }
+            return false;
+        }
     }
 
     @Override
     public boolean update(long id, Date dob) {
-        return false;
+        if (!find(id)) {
+            return false;
+        } else {
+            try {
+                PreparedStatement stm = conn.prepareStatement(updateQuery("dob"));
+                stm.setDate(1, dob);
+                stm.setLong(2, id);
+                if (stm.executeUpdate() == 1) {
+                    Logging.writeLog(logger.update("dob", id));
+                    return true;
+                }
+            } catch (SQLException e) {
+                Logging.writeLog(logger.getError(e));
+            }
+            return false;
+        }
     }
 
     @Override
     public boolean find(String username) {
+        if (getUsers().containsKey(username)) {
+            Logging.writeLog(logger.viewByUsername(username));
+            return true;
+        }
         return false;
     }
 
+    // Should not print by id because sql save by AUTO_INCREMENT
     @Override
-    public List<User> getUsers() {
+    public TreeMap<String, User> getUsers() {
+        try {
+            PreparedStatement stm = conn.prepareStatement(viewAllQuery);
+            ResultSet rs = stm.executeQuery();
+
+            while (rs.next()) {
+                Date dob = rs.getDate("dob");
+                _dob.setTime(dob);
+                treeUser.put(
+                        rs.getString("user_name"),
+                        new User(rs.getLong("id"),
+                                rs.getString("full_name"),
+                                _dob,
+                                rs.getString("address"),
+                                rs.getString("number_phone")));
+            }
+            Logging.writeLog(logger.view(0, treeUser.size()));
+            return treeUser;
+        } catch (SQLException e) {
+            Logging.writeLog(logger.getError(e));
+        }
         return null;
     }
 
     @Override
-    public boolean delete(User user) {
-       
-        return false;
-    }
-
-    @Override
-    public boolean delete(long id) {
-       
+    public boolean delete(List<Long> listIds) {
+        try {
+            PreparedStatement stm = conn.prepareStatement(deleteRangeQuery(listIds));
+            if (stm.executeUpdate() == 1) {
+                Logging.writeLog(logger.delete(listIds));
+                return true;
+            }
+        } catch (SQLException e) {
+            Logging.writeLog(logger.getError(e));
+        }
         return false;
     }
 }
