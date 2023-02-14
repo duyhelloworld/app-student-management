@@ -16,6 +16,7 @@ public abstract class GetConnect {
             Class.forName("com.mysql.cj.jdbc.Driver");
             conn = DriverManager.getConnection(url, usr, pss);
             if (conn != null) {
+                Logging.writeLog(logger.getFullInfo());
                 Logging.writeLog(logger.successLog(usr, pss));
             }
         } catch (ClassNotFoundException e) {
