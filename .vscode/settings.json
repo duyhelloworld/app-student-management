@@ -4,5 +4,6 @@
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
         "/media/duyaiti/Project/JSP_Servlet_Project/jdbcLearning/hello-connection/lib/MySqlJdbcDriver/mysql-connector-j-8.0.31.jar"
-    ]
+    ],
+    "java.debug.settings.onBuildFailureProceed": true
 }
